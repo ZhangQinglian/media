@@ -16,6 +16,8 @@ import java.io.File
 
 buildscript {
   repositories {
+    maven { url = uri("https://maven.aliyun.com/repository/central") }
+    maven { url = uri("https://maven.aliyun.com/repository/google") }
     google()
     mavenCentral()
   }
@@ -42,6 +44,8 @@ plugins {
 
 allprojects {
   repositories {
+    maven { url = uri("https://maven.aliyun.com/repository/central") }
+    maven { url = uri("https://maven.aliyun.com/repository/google") }
     google()
     mavenCentral()
     maven {

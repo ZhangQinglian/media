@@ -17,6 +17,8 @@ pluginManagement {
   includeBuild("build-logic-settings")
   includeBuild("build-logic")
   repositories {
+    maven { url = uri("https://maven.aliyun.com/repository/central") }
+    maven { url = uri("https://maven.aliyun.com/repository/google") }
     google()
     mavenCentral()
     gradlePluginPortal()
