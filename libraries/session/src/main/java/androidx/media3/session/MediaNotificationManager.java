@@ -162,7 +162,7 @@ import java.util.concurrent.TimeoutException;
    * @param session A session that needs notification update.
    * @param startInForegroundRequired Whether the service is required to start in the foreground.
    */
-  public void updateNotification(MediaSession session, boolean startInForegroundRequired) {
+  public void updateNotification(MediaSession session, boolean startInForegroundRequired, @MediaSessionService.NotificationUpdate int reason) {
     if (!mediaSessionService.isSessionAdded(session) || !shouldShowNotification(session)) {
       removeNotification();
       return;
@@ -180,7 +180,7 @@ import java.util.concurrent.TimeoutException;
         () -> {
           MediaNotification mediaNotification =
               this.mediaNotificationProvider.createNotification(
-                  session, mediaButtonPreferences, actionFactory, callback);
+                  session, mediaButtonPreferences, actionFactory, callback, reason);
           mainExecutor.execute(
               () ->
                   updateNotificationInternal(
@@ -202,7 +202,7 @@ import java.util.concurrent.TimeoutException;
       List<MediaSession> sessions = mediaSessionService.getSessions();
       for (int i = 0; i < sessions.size(); i++) {
         mediaSessionService.onUpdateNotificationInternal(
-            sessions.get(i), /* startInForegroundWhenPaused= */ false);
+            sessions.get(i), /* startInForegroundWhenPaused= */ false, MediaSessionService.NOTIFICATION_UPDATE_ENGAGED_TIMEOUT);
       }
       return true;
     }
@@ -247,7 +247,7 @@ import java.util.concurrent.TimeoutException;
       List<MediaSession> sessions = mediaSessionService.getSessions();
       for (int i = 0; i < sessions.size(); i++) {
         mediaSessionService.onUpdateNotificationInternal(
-            sessions.get(i), /* startInForegroundWhenPaused= */ false);
+            sessions.get(i), /* startInForegroundWhenPaused= */ false, MediaSessionService.NOTIFICATION_UPDATE_ENGAGED_TIMEOUT_DISABLED);
       }
     }
   }
@@ -377,7 +377,7 @@ import java.util.concurrent.TimeoutException;
     public void onConnected(boolean shouldShowNotification) {
       if (shouldShowNotification) {
         mediaSessionService.onUpdateNotificationInternal(
-            session, /* startInForegroundWhenPaused= */ false);
+            session, /* startInForegroundWhenPaused= */ false, MediaSessionService.NOTIFICATION_UPDATE_CONNECTED);
       }
     }
 
@@ -385,14 +385,14 @@ import java.util.concurrent.TimeoutException;
     public void onMediaButtonPreferencesChanged(
         MediaController controller, List<CommandButton> mediaButtonPreferences) {
       mediaSessionService.onUpdateNotificationInternal(
-          session, /* startInForegroundWhenPaused= */ false);
+          session, /* startInForegroundWhenPaused= */ false, MediaSessionService.NOTIFICATION_UPDATE_BUTTON_PREFERENCES_CHANGED);
     }
 
     @Override
     public void onAvailableSessionCommandsChanged(
         MediaController controller, SessionCommands commands) {
       mediaSessionService.onUpdateNotificationInternal(
-          session, /* startInForegroundWhenPaused= */ false);
+          session, /* startInForegroundWhenPaused= */ false, MediaSessionService.NOTIFICATION_UPDATE_SESSION_COMMANDS_CHANGED);
     }
 
     @Override
@@ -413,7 +413,7 @@ import java.util.concurrent.TimeoutException;
       }
       // We may need to hide the notification.
       mediaSessionService.onUpdateNotificationInternal(
-          session, /* startInForegroundWhenPaused= */ false);
+          session, /* startInForegroundWhenPaused= */ false, MediaSessionService.NOTIFICATION_UPDATE_DISCONNECTED);
     }
 
     @Override
@@ -426,7 +426,7 @@ import java.util.concurrent.TimeoutException;
           Player.EVENT_MEDIA_METADATA_CHANGED,
           Player.EVENT_TIMELINE_CHANGED)) {
         mediaSessionService.onUpdateNotificationInternal(
-            session, /* startInForegroundWhenPaused= */ false);
+            session, /* startInForegroundWhenPaused= */ false,  MediaSessionService.NOTIFICATION_UPDATE_PLAYER_EVENT);
       }
     }
   }
