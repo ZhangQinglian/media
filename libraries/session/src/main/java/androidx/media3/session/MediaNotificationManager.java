@@ -191,7 +191,9 @@ import java.util.concurrent.TimeoutException;
    * @param startInForegroundRequired Whether the service is required to start in the foreground.
    */
   public ListenableFuture<@NullableType Void> updateNotification(
-      MediaSession session, boolean startInForegroundRequired) {
+      MediaSession session,
+      boolean startInForegroundRequired,
+      @MediaSessionService.NotificationUpdate int reason) {
     return CallbackToFutureAdapter.getFuture(
         completer -> {
           if (!mediaSessionService.isSessionAdded(session) || !shouldShowNotification(session)) {
@@ -213,7 +215,7 @@ import java.util.concurrent.TimeoutException;
                 try {
                   MediaNotification mediaNotification =
                       this.mediaNotificationProvider.createNotification(
-                          session, mediaButtonPreferences, actionFactory, callback);
+                          session, mediaButtonPreferences, actionFactory, callback, reason);
                   checkState(
                       /* expression= */ mediaNotification.notificationId
                           != SHUTDOWN_NOTIFICATION_ID,
@@ -255,7 +257,9 @@ import java.util.concurrent.TimeoutException;
     List<MediaSession> sessions = mediaSessionService.getSessions();
     for (int i = 0; i < sessions.size(); i++) {
       mediaSessionService.onUpdateNotificationInternal(
-          sessions.get(i), /* startInForegroundWhenPaused= */ false);
+          sessions.get(i),
+          /* startInForegroundWhenPaused= */ false,
+          MediaSessionService.NOTIFICATION_UPDATE_IDLE_PLAYER_SETTING_CHANGED);
     }
   }
 
@@ -265,7 +269,7 @@ import java.util.concurrent.TimeoutException;
       List<MediaSession> sessions = mediaSessionService.getSessions();
       for (int i = 0; i < sessions.size(); i++) {
         mediaSessionService.onUpdateNotificationInternal(
-            sessions.get(i), /* startInForegroundWhenPaused= */ false);
+            sessions.get(i), /* startInForegroundWhenPaused= */ false, MediaSessionService.NOTIFICATION_UPDATE_ENGAGED_TIMEOUT);
       }
       return true;
     }
@@ -310,7 +314,7 @@ import java.util.concurrent.TimeoutException;
       List<MediaSession> sessions = mediaSessionService.getSessions();
       for (int i = 0; i < sessions.size(); i++) {
         mediaSessionService.onUpdateNotificationInternal(
-            sessions.get(i), /* startInForegroundWhenPaused= */ false);
+            sessions.get(i), /* startInForegroundWhenPaused= */ false, MediaSessionService.NOTIFICATION_UPDATE_ENGAGED_TIMEOUT_DISABLED);
       }
     }
   }
@@ -475,7 +479,7 @@ import java.util.concurrent.TimeoutException;
     public void onConnected(boolean shouldShowNotification) {
       if (shouldShowNotification) {
         mediaSessionService.onUpdateNotificationInternal(
-            session, /* startInForegroundWhenPaused= */ false);
+            session, /* startInForegroundWhenPaused= */ false, MediaSessionService.NOTIFICATION_UPDATE_CONNECTED);
       }
     }
 
@@ -483,14 +487,14 @@ import java.util.concurrent.TimeoutException;
     public void onMediaButtonPreferencesChanged(
         MediaController controller, List<CommandButton> mediaButtonPreferences) {
       mediaSessionService.onUpdateNotificationInternal(
-          session, /* startInForegroundWhenPaused= */ false);
+          session, /* startInForegroundWhenPaused= */ false, MediaSessionService.NOTIFICATION_UPDATE_BUTTON_PREFERENCES_CHANGED);
     }
 
     @Override
     public void onAvailableSessionCommandsChanged(
         MediaController controller, SessionCommands commands) {
       mediaSessionService.onUpdateNotificationInternal(
-          session, /* startInForegroundWhenPaused= */ false);
+          session, /* startInForegroundWhenPaused= */ false, MediaSessionService.NOTIFICATION_UPDATE_SESSION_COMMANDS_CHANGED);
     }
 
     @Override
@@ -511,7 +515,7 @@ import java.util.concurrent.TimeoutException;
       }
       // We may need to hide the notification.
       mediaSessionService.onUpdateNotificationInternal(
-          session, /* startInForegroundWhenPaused= */ false);
+          session, /* startInForegroundWhenPaused= */ false, MediaSessionService.NOTIFICATION_UPDATE_DISCONNECTED);
     }
 
     @Override
@@ -524,7 +528,7 @@ import java.util.concurrent.TimeoutException;
           Player.EVENT_MEDIA_METADATA_CHANGED,
           Player.EVENT_TIMELINE_CHANGED)) {
         mediaSessionService.onUpdateNotificationInternal(
-            session, /* startInForegroundWhenPaused= */ false);
+            session, /* startInForegroundWhenPaused= */ false,  MediaSessionService.NOTIFICATION_UPDATE_PLAYER_EVENT);
       }
     }
   }

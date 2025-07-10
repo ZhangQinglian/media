@@ -198,7 +198,8 @@ public final class MediaNotification {
         MediaSession mediaSession,
         ImmutableList<CommandButton> mediaButtonPreferences,
         ActionFactory actionFactory,
-        Callback onNotificationChangedCallback);
+        Callback onNotificationChangedCallback,
+        @MediaSessionService.NotificationUpdate int reason);
 
     /**
      * Handles a notification's custom command.
