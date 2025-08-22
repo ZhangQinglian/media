@@ -208,7 +208,7 @@ import java.util.concurrent.TimeoutException;
     List<MediaSession> sessions = mediaSessionService.getSessions();
     for (int i = 0; i < sessions.size(); i++) {
       mediaSessionService.onUpdateNotificationInternal(
-          sessions.get(i), /* startInForegroundWhenPaused= */ false);
+          sessions.get(i), /* startInForegroundWhenPaused= */ false,MediaSessionService.NOTIFICATION_UPDATE_IDLE_PLAYER_SETTING_CHANGED);
     }
   }
 
