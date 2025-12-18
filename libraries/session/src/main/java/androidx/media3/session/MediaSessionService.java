@@ -816,7 +816,7 @@ public abstract class MediaSessionService extends Service {
   public final void triggerNotificationUpdate() {
     List<MediaSession> sessions = getSessions();
     for (int i = 0; i < sessions.size(); i++) {
-      onUpdateNotificationInternal(sessions.get(i), /* startInForegroundWhenPaused= */ false);
+      onUpdateNotificationInternal(sessions.get(i), /* startInForegroundWhenPaused= */ false, NOTIFICATION_UPDATE_MANUAL);
     }
   }
 
