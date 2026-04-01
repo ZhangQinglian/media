@@ -22,6 +22,8 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.scale
 
 /** Utilities for [Bitmap]s. */
 object BitmapUtils {
@@ -39,11 +41,7 @@ object BitmapUtils {
       bitmap = drawable.bitmap
     } else {
       bitmap =
-        Bitmap.createBitmap(
-          drawable.intrinsicWidth,
-          drawable.intrinsicHeight,
-          Bitmap.Config.ARGB_8888
-        )
+          createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight)
       val canvas = Canvas(bitmap)
       drawable.setBounds(0, 0, canvas.width, canvas.height)
       drawable.draw(canvas)
@@ -67,7 +65,7 @@ object BitmapUtils {
         scaleWidth = iconSize
         scaleHeight = (height * iconSize.toFloat() / width).toInt()
       }
-      Bitmap.createScaledBitmap(bitmap, scaleWidth, scaleHeight, false)
+        bitmap.scale(scaleWidth, scaleHeight, false)
     } else {
       bitmap
     }
@@ -88,12 +86,12 @@ object BitmapUtils {
 
     // Create a Bitmap backed Canvas to be the toolbar icon.
     val toolbarIcon: Bitmap =
-      Bitmap.createBitmap(sizeWithPadding, sizeWithPadding, Bitmap.Config.ARGB_8888)
+        createBitmap(sizeWithPadding, sizeWithPadding)
     val canvas = Canvas(toolbarIcon)
     canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
 
     // Resize the app icon to Material Design size.
-    val scaledIcon: Bitmap = Bitmap.createScaledBitmap(icon, iconSize, iconSize, false)
+    val scaledIcon: Bitmap = icon.scale(iconSize, iconSize, false)
     canvas.drawBitmap(scaledIcon, padding.toFloat(), padding.toFloat(), null)
     return toolbarIcon
   }
