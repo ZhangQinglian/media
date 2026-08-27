@@ -751,9 +751,37 @@ public final class DefaultAudioSink implements AudioSink {
       pipelineProcessors.addAll(availableAudioProcessors);
       if (shouldUseFloatOutput(inputFormat.pcmEncoding)) {
         pipelineProcessors.add(toFloatPcmAudioProcessor);
+        // Upstream Media3 omits the processor chain on the float path because
+        // SonicAudioProcessor outputs 16-bit PCM and would defeat HiFi float
+        // output (see shouldApplyAudioProcessorPlaybackParameters). Application
+        // processors such as EQ must still run after ToFloatPcm. Speed/pitch on
+        // this path is applied via AudioTrack playback parameters instead.
+        AudioProcessor[] applicationProcessors = getApplicationAudioProcessors();
+        pipelineProcessors.add(applicationProcessors);
+        android.util.Log.i(
+            "equalizer",
+            "event=sink_pipeline path=float pcmEncoding="
+                + inputFormat.pcmEncoding
+                + " sampleRate="
+                + inputFormat.sampleRate
+                + " channels="
+                + inputFormat.channelCount
+                + " appProcessors="
+                + applicationProcessors.length);
       } else {
         pipelineProcessors.add(toInt16PcmAudioProcessor);
-        pipelineProcessors.add(audioProcessorChain.getAudioProcessors());
+        AudioProcessor[] chainProcessors = audioProcessorChain.getAudioProcessors();
+        pipelineProcessors.add(chainProcessors);
+        android.util.Log.i(
+            "equalizer",
+            "event=sink_pipeline path=int16 pcmEncoding="
+                + inputFormat.pcmEncoding
+                + " sampleRate="
+                + inputFormat.sampleRate
+                + " channels="
+                + inputFormat.channelCount
+                + " chainProcessors="
+                + chainProcessors.length);
       }
       audioProcessingPipeline = new AudioProcessingPipeline(pipelineProcessors.build());
 
@@ -1678,6 +1706,36 @@ public final class DefaultAudioSink implements AudioSink {
    */
   private boolean shouldUseFloatOutput(@C.PcmEncoding int pcmEncoding) {
     return enableFloatOutput && Util.isEncodingHighResolutionPcm(pcmEncoding);
+  }
+
+  /**
+   * Returns user-defined processors from {@link #audioProcessorChain}, excluding {@link
+   * SilenceSkippingAudioProcessor} and {@link SonicAudioProcessor}.
+   *
+   * <p>Those two are appended by {@link DefaultAudioProcessorChain} for playback parameters. Sonic
+   * outputs 16-bit PCM, so they must not run when {@link #shouldUseFloatOutput} is true.
+   */
+  private AudioProcessor[] getApplicationAudioProcessors() {
+    AudioProcessor[] chainProcessors = audioProcessorChain.getAudioProcessors();
+    int count = 0;
+    for (AudioProcessor processor : chainProcessors) {
+      if (!isPlaybackParameterProcessor(processor)) {
+        count++;
+      }
+    }
+    AudioProcessor[] applicationProcessors = new AudioProcessor[count];
+    int index = 0;
+    for (AudioProcessor processor : chainProcessors) {
+      if (!isPlaybackParameterProcessor(processor)) {
+        applicationProcessors[index++] = processor;
+      }
+    }
+    return applicationProcessors;
+  }
+
+  private static boolean isPlaybackParameterProcessor(AudioProcessor processor) {
+    return processor instanceof SonicAudioProcessor
+        || processor instanceof SilenceSkippingAudioProcessor;
   }
 
   /**
