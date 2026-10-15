@@ -961,7 +961,7 @@ public abstract class MediaSessionService extends LifecycleService {
         ? getMediaNotificationManager()
             .updateNotification(session, startInForegroundRequired, reason)
         : immediateVoidFuture();
-  }  }
+  }
 
   /**
    * Manually trigger a notification update.
@@ -1035,7 +1035,7 @@ public abstract class MediaSessionService extends LifecycleService {
             serviceListener.onForegroundServiceStartNotAllowedException();
           }
         });
-  }  }
+  }
 
   /**
    * Manually trigger a call to {@link MediaNotification.Provider#createNotification(MediaSession,
