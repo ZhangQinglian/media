@@ -37,6 +37,8 @@ dependencies {
   testImplementation(project(":test-utils"))
   testImplementation(project(":test-utils-robolectric"))
   testImplementation(project(":lib-exoplayer"))
+  // Observe the final manager in dispatch tests without changing the production API.
+  testImplementation("org.mockito:mockito-inline:${libs.versions.mockitoVersion.get()}")
   testImplementation(libs.robolectric)
   testImplementation(libs.test.parameter.injector)
 }

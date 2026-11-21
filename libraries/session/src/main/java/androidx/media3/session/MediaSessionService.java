@@ -915,10 +915,8 @@ public abstract class MediaSessionService extends LifecycleService {
       MediaSession session,
       boolean startInForegroundRequired,
       @NotificationUpdate int reason) {
+    // Legacy customization hook only. The async caller owns the default notification update.
     onUpdateNotification(session);
-    if (defaultMethodCalled) {
-      getMediaNotificationManager().updateNotification(session, startInForegroundRequired, reason);
-    }
   }
 
   /**
@@ -956,6 +954,9 @@ public abstract class MediaSessionService extends LifecycleService {
   @UnstableApi
   public ListenableFuture<@NullableType Void> onUpdateNotificationAsync(
       MediaSession session, boolean startInForegroundRequired, @NotificationUpdate int reason) {
+    // Reset before virtual dispatch: an override that does not call super must opt out even if
+    // an earlier invocation used the default implementation.
+    defaultMethodCalled = false;
     onUpdateNotification(session, startInForegroundRequired, reason);
     return defaultMethodCalled
         ? getMediaNotificationManager()
